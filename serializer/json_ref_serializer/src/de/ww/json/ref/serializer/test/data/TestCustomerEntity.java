@@ -14,6 +14,9 @@ import de.ww.json.ref.serializer.annotations.RestPath;
  * Dadurch wäre dann ein vernünftiges Binding an die zukünftige Version der StatlessUI
  * (dann knockout.java) möglich.
  *
+ * Auch im anderen Fall (ohne knockout.java) muss der Pfad in die Just-Reference-Annotation 
+ * rein und nicht über dem Entity stehen, das ist einfach zu unflexibel.
+ *
  */
 @RestPath("http://localhost:8080/test/entity/customer/{id}")
 public class TestCustomerEntity {
