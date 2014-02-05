@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 
 import de.ww.json.ref.serializer.annotations.JustReference;
 import de.ww.json.ref.serializer.annotations.RestPath;
+import de.ww.json.ref.serializer.exceptions.SerializerException;
 
 /**
  * JSON-Serialisierer, der es ermöglicht Beziehungen zwischen Objekten
@@ -33,13 +34,9 @@ public class Serializer {
 	 * Wandelt ein Objekt in einen JSON-String um ...
 	 * @param data
 	 * @return
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
-	 * @throws NoSuchMethodException
-	 * @throws SecurityException
+	 * @throws SerializerException 
 	 */
-	public static String serialize(Object data) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	public static String serialize(Object data) throws SerializerException {
 		Class<?> type = data.getClass();
 		Method methods[] = type.getMethods();
 		StringBuffer buffer = new StringBuffer();
@@ -60,15 +57,12 @@ public class Serializer {
 	 * @param buffer
 	 * @param data
 	 * @param m
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
+	 * @throws SerializerException 
 	 */
-	private static void writeList(StringBuffer buffer, Object data, Method m) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private static void writeList(StringBuffer buffer, Object data, Method m) throws SerializerException {
 		String fieldName = getNormalizedGetterString(m);
-		Object list = m.invoke(data);		
+		Object list = get(data, m);
+		
 		buffer.append(STRING_DELIMITER);
 		buffer.append(fieldName);
 		buffer.append(STRING_DELIMITER);
@@ -93,15 +87,11 @@ public class Serializer {
 	/**
 	 * Einen Eintrag für ein Skalar-Feld schreiben
 	 * @param buffer
-	 * @param data
-	 * @param m
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
+	 * @param data Objekt zu dem die Get-Methode gehört
+	 * @param m Get-Methode
+	 * @throws SerializerException 
 	 */
-	private static void writeScalar(StringBuffer buffer, Object data, Method m) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private static void writeScalar(StringBuffer buffer, Object data, Method m) throws SerializerException {
 		String fieldName = getNormalizedGetterString(m);
 		
 		Object value = getValue(data, m);
@@ -124,15 +114,16 @@ public class Serializer {
 	 * @throws InvocationTargetException
 	 * @throws SecurityException 
 	 * @throws NoSuchMethodException 
+	 * @throws SerializerException 
 	 */
-	private static Object getValue(Object data, Method m) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private static Object getValue(Object data, Method m) throws SerializerException {
 		Object value = null;		
 		if(m.getReturnType().isPrimitive() 
 				|| m.getReturnType().equals(String.class) ) {
-			value = m.invoke(data);
-			value = STRING_DELIMITER+value+STRING_DELIMITER;
+			value = get(data, m);
+			value = STRING_DELIMITER+value+STRING_DELIMITER;			
 		} else {
-			Object result = m.invoke(data);
+			Object result = get(data, m);			 
 			if(m.isAnnotationPresent(JustReference.class)) {
 				if(result != null) {
 					value = writeReference(result);
@@ -153,35 +144,61 @@ public class Serializer {
 	/**
 	 * Schreibt ein Referenz-Objekt anstelle des eigentlichen JSON-Objekts
 	 * 
-	 * TODO: Zerlegen in Teilmethoden 
-	 * 
 	 * @param result
 	 * @return
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
+	 * @throws SerializerException 
 	 */
-	private static Object writeReference(Object result) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private static String writeReference(Object result) throws SerializerException {
 		
 		if(!result.getClass().isAnnotationPresent(RestPath.class))
 			throw new IllegalStateException("Referenzen sind nur für Entities mit RestPath-Annotation zulässig");
 		
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(OBJECT_OPEN);
+		try {
+			
+			StringBuffer buffer = new StringBuffer();
+			buffer.append(OBJECT_OPEN);
+			writeReferenceUrlAttribute(buffer, result);					
+			buffer.append(FIELD_DELIMITER);
+			writeReferenceGetMethod(buffer, result);
+			buffer.append(OBJECT_CLOSE);			
+			return buffer.toString();
+			
+		} catch(Exception ex) {
+			throw new SerializerException(ex);
+		}
+	}
+	
+	/**
+	 * Schreibt das URL-Attribut in die Referenz 
+	 * (Sollte nur aus writeReference aufgerufen werden!)
+	 * 
+	 * TODO: Diese Methode ist nur ein einfacher Dummy, die reale Implementierung muss beliebige {}-Parameter können 
+	 * 
+	 * @param buffer
+	 * @param result
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
+	private static void writeReferenceUrlAttribute(StringBuffer buffer, Object result) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		buffer.append("'url':'");
 		// TODO: in Zukunft noch alle möglichen enthaltenen {}-Parameter ersetzen!
 		String urlTemplate = result.getClass().getAnnotation(RestPath.class).value();
 		String url = urlTemplate.replaceAll("\\{id\\}", result.getClass().getMethod("getId").invoke(result).toString());
-		// ----
 		buffer.append(url);
 		buffer.append("'");
-		buffer.append(FIELD_DELIMITER);
+	}
+	
+	/**
+	 * Schreibt in den buffer eine Methode zum Laden des Objekt mit der URL this.url
+	 * @param buffer
+	 * @param result
+	 */
+	private static void writeReferenceGetMethod(StringBuffer buffer, Object result) {
 		// TODO: hier noch eine richtige Lade-Funktion generieren...
 		buffer.append("'get':function(successHandler, errorHandler) { alert(this.url); }");
-		buffer.append(OBJECT_CLOSE);
-		return buffer.toString();
 	}
 
 	/**
@@ -229,6 +246,23 @@ public class Serializer {
 		name = name.toLowerCase();
 		
 		return name;
+	}
+	
+	/**
+	 * Einen Getter aufrufen und mglw. auftretende Fehler als SerializerException verpacken
+	 * @param data Objekt, an dem die Methode aufgerufen werden soll
+	 * @param m    Methode, die aufgerufen werden soll
+	 * @return
+	 * @throws SerializerException
+	 */
+	private static Object get(Object data, Method m) throws SerializerException {
+		Object result;
+		try {
+			result = m.invoke(data);
+			return result;
+		} catch (Exception e) {
+			throw new SerializerException(e);
+		} 	
 	}
 
 }
