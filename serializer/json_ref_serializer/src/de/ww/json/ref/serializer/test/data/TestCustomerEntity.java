@@ -10,6 +10,7 @@ import de.ww.json.ref.serializer.annotations.RestPath;
 public class TestCustomerEntity {
 
 	private int id;
+	private Integer testInteger;
 	private String name, vorname;
 	private TestCustomerEntity child;
 	private Date birthDate;
@@ -71,5 +72,13 @@ public class TestCustomerEntity {
 	
 	public void setChild(TestCustomerEntity child) {
 		this.child = child;
+	}
+
+	public Integer getTestInteger() {
+		return testInteger;
+	}
+
+	public void setTestInteger(Integer testInteger) {
+		this.testInteger = testInteger;
 	}	
 }

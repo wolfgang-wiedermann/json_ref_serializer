@@ -33,6 +33,7 @@ public class TestSerializer {
 		entity.setName("Wolfgang");
 		entity.setVorname("Wiedermann");
 		entity.setBirthDate(new Date());
+		entity.setTestInteger(1234);
 		entity.setChild(entity2);
 		
 		ArrayList<TestCustomerEntity> lst = new ArrayList<TestCustomerEntity>();

@@ -14,7 +14,6 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
  * 
  * siehe z. B. http://en.wikipedia.org/wiki/HATEOAS
  * 
- * TODO: Exception-Handling
  * TODO: JustReference bei Listen ...
  * 
  * @author wiw39784
@@ -53,6 +52,9 @@ public class Serializer {
 	}
 	
 	/**
+	 * Serialisiert Attribute mit Listen
+	 * 
+	 * TODO: ein geeignetes WriteList für Listen mit Referenzen schreiben.
 	 * 
 	 * @param buffer
 	 * @param data
@@ -105,28 +107,31 @@ public class Serializer {
 	}
 	
 	/**
-	 * Ermittelt den Wert eines Feldes
+	 * Ermittelt den Wert eines Feldes in passender Darstellung für den JSON-String
 	 * @param data
 	 * @param m
 	 * @return
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
 	 * @throws SerializerException 
 	 */
 	private static Object getValue(Object data, Method m) throws SerializerException {
-		Object value = null;		
+		Object value = null;	
+		
 		if(m.getReturnType().isPrimitive() 
-				|| m.getReturnType().equals(String.class) ) {
+				|| m.getReturnType().equals(String.class)
+				|| m.getReturnType().equals(Integer.class)
+				|| m.getReturnType().equals(Double.class)
+				|| m.getReturnType().equals(Float.class)) {
+			// Primitive Typen und Strings
+			// TODO die || aufzählung muss raus in eine eigene isPrimitiveOrWrapper-Methode!
 			value = get(data, m);
-			value = STRING_DELIMITER+value+STRING_DELIMITER;			
+			value = STRING_DELIMITER+value+STRING_DELIMITER;
 		} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(m.getReturnType())) {
+			// Spezielle Basistypen wie Date
 			value = get(data, m);
 			if(value != null)
 				value = TypeSerializerRepository.getInstance().serialize(value);			
 		} else {
+			// Alle anderen komplexen Typen
 			Object result = get(data, m);			 
 			if(m.isAnnotationPresent(JustReference.class)) {
 				if(result != null) {
