@@ -6,5 +6,6 @@ public class SerializerException extends Exception {
 
 	public SerializerException () { super(); }
 	public SerializerException (Throwable nested) { super(nested); }
+	public SerializerException (String message) { super(message); }
 	
 }

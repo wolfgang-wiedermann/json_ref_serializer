@@ -1,10 +1,12 @@
 package de.ww.json.ref.serializer.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 import de.ww.json.ref.serializer.Serializer;
 import de.ww.json.ref.serializer.test.data.TestCustomerEntity;
 
@@ -30,6 +32,7 @@ public class TestSerializer {
 		entity.setId(1);
 		entity.setName("Wolfgang");
 		entity.setVorname("Wiedermann");
+		entity.setBirthDate(new Date());
 		entity.setChild(entity2);
 		
 		ArrayList<TestCustomerEntity> lst = new ArrayList<TestCustomerEntity>();

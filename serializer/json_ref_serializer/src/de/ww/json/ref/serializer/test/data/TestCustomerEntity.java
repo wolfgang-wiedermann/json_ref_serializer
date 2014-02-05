@@ -1,6 +1,7 @@
 package de.ww.json.ref.serializer.test.data;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import de.ww.json.ref.serializer.annotations.JustReference;
 import de.ww.json.ref.serializer.annotations.RestPath;
@@ -11,6 +12,7 @@ public class TestCustomerEntity {
 	private int id;
 	private String name, vorname;
 	private TestCustomerEntity child;
+	private Date birthDate;
 	private ArrayList<TestCustomerEntity> children;
 	
 	public int getId() {
@@ -37,6 +39,14 @@ public class TestCustomerEntity {
 		this.vorname = vorname;
 	}
 	
+	public Date getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(Date birthDate) {
+		this.birthDate = birthDate;
+	}
+
 	public ArrayList<String> getBeispiele() {
 		ArrayList<String> lst = new ArrayList<String>();
 		lst.add("Hallo");
