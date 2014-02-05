@@ -126,7 +126,7 @@ public class Serializer {
 			value = get(data, m);
 			value = STRING_DELIMITER+value+STRING_DELIMITER;
 		} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(m.getReturnType())) {
-			// Spezielle Basistypen wie Date
+			// Spezielle Basistypen wie java.lang.Date
 			value = get(data, m);
 			if(value != null)
 				value = TypeSerializerRepository.getInstance().serialize(value);			

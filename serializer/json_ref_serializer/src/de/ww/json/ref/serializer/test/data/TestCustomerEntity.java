@@ -6,6 +6,15 @@ import java.util.Date;
 import de.ww.json.ref.serializer.annotations.JustReference;
 import de.ww.json.ref.serializer.annotations.RestPath;
 
+/**
+ * Überlegen, evtl. brauch ich oben den Rest-Path nicht wenn 
+ * ich alternativ dazu unten unter @JustReference(lookupController=TestControllerDummy.class)
+ * alles notwendige aus der Controller-Annotation des Controllers rauslesen kann.
+ * 
+ * Dadurch wäre dann ein vernünftiges Binding an die zukünftige Version der StatlessUI
+ * (dann knockout.java) möglich.
+ *
+ */
 @RestPath("http://localhost:8080/test/entity/customer/{id}")
 public class TestCustomerEntity {
 
@@ -56,7 +65,7 @@ public class TestCustomerEntity {
 	}
 	
 	// Dieses JustReference funktioniert noch nicht!
-	@JustReference
+	@JustReference(lookupController=TestControllerDummy.class)
 	public ArrayList<TestCustomerEntity> getChildren() {
 		return children;
 	}
@@ -65,7 +74,7 @@ public class TestCustomerEntity {
 		this.children = children;
 	}
 	
-	@JustReference
+	@JustReference(lookupController=TestControllerDummy.class)
 	public TestCustomerEntity getChild() {
 		return child;
 	}
