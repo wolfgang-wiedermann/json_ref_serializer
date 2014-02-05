@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import de.ww.json.ref.serializer.exceptions.SerializerException;
 import de.ww.json.ref.serializer.typeserializers.DateTypeSerializer;
+import de.ww.json.ref.serializer.typeserializers.WrapperTypeSerializer;
 
 /**
  * Ein Repository, das Serialisierer für verschiedene komplexere Typen wie
@@ -17,9 +18,15 @@ public class TypeSerializerRepository {
 	
 	private HashMap<Class<?>, ITypeSerializer> serializers = new HashMap<Class<?>, ITypeSerializer>();
 	
+	/**
+	 * Lädt das TypeSerializterRepository mit den Standard-Serialisieren
+	 * 
+	 * Weitere können zur Laufzeit via TypeSerializerRepository.getInstance().registerPlugin(...) 
+	 * hinzugefügt werden.
+	 */
 	private TypeSerializerRepository() {
-		// TODO: hier die verschiedenen Implementierungen für die jeweiligen Typen hinzufügen
-		serializers.put(java.util.Date.class, new DateTypeSerializer());
+		this.registerPlugin(new DateTypeSerializer());
+		this.registerPlugin(new WrapperTypeSerializer());
 	}
 	
 	public static TypeSerializerRepository getInstance() {
@@ -27,6 +34,14 @@ public class TypeSerializerRepository {
 			instance = new TypeSerializerRepository();
 		}
 		return instance;
+	}
+	
+	/**
+	 * Registrieren eines weiteren Typ-Serialisierers
+	 * @param plugin
+	 */
+	public void registerPlugin(ITypeSerializer plugin) {
+		plugin.registerAsPlugin(this.serializers);
 	}
 	
 	/**

@@ -21,7 +21,7 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
  */
 public class Serializer {
 
-	private static String OBJECT_OPEN = "{"
+	public final static String OBJECT_OPEN = "{"
 			, OBJECT_CLOSE = "}"
 			, ARRAY_OPEN = "["
 			, ARRAY_CLOSE = "]"
@@ -117,12 +117,8 @@ public class Serializer {
 		Object value = null;	
 		
 		if(m.getReturnType().isPrimitive() 
-				|| m.getReturnType().equals(String.class)
-				|| m.getReturnType().equals(Integer.class)
-				|| m.getReturnType().equals(Double.class)
-				|| m.getReturnType().equals(Float.class)) {
+				|| m.getReturnType().equals(String.class)) {
 			// Primitive Typen und Strings
-			// TODO die || aufzählung muss raus in eine eigene isPrimitiveOrWrapper-Methode!
 			value = get(data, m);
 			value = STRING_DELIMITER+value+STRING_DELIMITER;
 		} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(m.getReturnType())) {
