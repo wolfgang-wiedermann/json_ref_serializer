@@ -78,8 +78,7 @@ public class Serializer {
 				} else if(o.getClass().isPrimitive()) {
 					buffer.append(""+o);
 				} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(o.getClass())) {
-					if(o != null)
-						buffer.append(TypeSerializerRepository.getInstance().serialize(o));						
+					buffer.append(TypeSerializerRepository.getInstance().serialize(o));						
 				} else {
 					if(m.isAnnotationPresent(JustReference.class)) {
 						buffer.append(writeReference(o));
