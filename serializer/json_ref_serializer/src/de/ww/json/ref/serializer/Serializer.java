@@ -2,6 +2,8 @@ package de.ww.json.ref.serializer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import de.ww.json.ref.serializer.annotations.JustReference;
 import de.ww.json.ref.serializer.annotations.RestPath;
@@ -37,7 +39,7 @@ public class Serializer {
 	public static String serialize(Object data) throws SerializerException {
 		StringBuffer buffer = new StringBuffer();		
 		if(isList(data)) {
-			writeList(buffer, (Iterable<?>)data, false);
+			writeList(buffer, data, false);
 		} else {
 			writeObject(buffer, data);
 		}		
@@ -83,7 +85,7 @@ public class Serializer {
 		buffer.append(fieldName);
 		buffer.append(STRING_DELIMITER);
 		buffer.append(NAME_DELIMITER);
-		writeList(buffer, (Iterable<?>)list, m.isAnnotationPresent(JustReference.class));
+		writeList(buffer, list, m.isAnnotationPresent(JustReference.class));
 		buffer.append(FIELD_DELIMITER);
 		
 	}
@@ -94,10 +96,15 @@ public class Serializer {
 	 * @param list
 	 * @throws SerializerException
 	 */
-	private static void writeList(StringBuffer buffer, Iterable<?> list, boolean justReference) throws SerializerException {
+	private static void writeList(StringBuffer buffer, Object list, boolean justReference) throws SerializerException {
 		buffer.append(ARRAY_OPEN);
 		if(list != null) {
+			
+			if(list.getClass().isArray()) {
+				list = arrayToListObject(list);
+			}
 			Iterable<?> castedList = (Iterable<?>)list;
+			
 			for(Object o : castedList) {
 				if(o == null) {
 					buffer.append("null");
@@ -304,6 +311,19 @@ public class Serializer {
 		} catch (Exception e) {
 			throw new SerializerException(e);
 		} 	
+	}
+	
+	/**
+	 * 
+	 * @param data
+	 * @return
+	 */
+	private static List arrayToListObject(Object data) throws SerializerException {
+		if(data == null) return null;
+		if(!data.getClass().isArray()) throw new SerializerException("Es soll ein Array, das kein Array is in eine Liste umgewandelt werden");
+		
+		Object[] array = (Object[])data;
+		return Arrays.asList(array);
 	}
 
 }

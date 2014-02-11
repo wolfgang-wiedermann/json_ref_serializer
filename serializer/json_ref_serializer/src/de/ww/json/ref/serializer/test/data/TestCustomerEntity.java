@@ -76,6 +76,13 @@ public class TestCustomerEntity {
 		return children;
 	}
 	
+	public TestCustomerEntity[] getArray() {
+		if(children != null)
+			return children.toArray(new TestCustomerEntity[children.size()]);
+		else
+			return new TestCustomerEntity[0];
+	}
+	
 	public void setChildren(ArrayList<TestCustomerEntity> children) {
 		this.children = children;
 	}
@@ -85,9 +92,6 @@ public class TestCustomerEntity {
 		return child;
 	}
 	
-	/*
-	 * Funktioniert nicht ...
-	 */
 	public ArrayList<ArrayList<String>> getBoxedArrayList() {
 		ArrayList<ArrayList<String>> lst = new ArrayList<ArrayList<String>>();
 		lst.add(new ArrayList<String>());
