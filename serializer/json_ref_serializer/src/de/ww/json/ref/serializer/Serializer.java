@@ -14,7 +14,6 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
  * 
  * siehe z. B. http://en.wikipedia.org/wiki/HATEOAS
  * 
- * TODO: Serialisieren von verschachtelten Listen ...
  * 
  * @author wiw39784
  *
@@ -36,23 +35,34 @@ public class Serializer {
 	 * @throws SerializerException 
 	 */
 	public static String serialize(Object data) throws SerializerException {
-		Class<?> type = data.getClass();
-		Method methods[] = type.getMethods();
 		StringBuffer buffer = new StringBuffer();		
 		if(isList(data)) {
 			writeList(buffer, (Iterable<?>)data, false);
 		} else {
-			buffer.append(OBJECT_OPEN);
-			for(Method m : methods) {
-				if(isScalarGetter(m)) {				
-					writeScalar(buffer, data, m);
-				} else if(isListGetter(m)) {
-					writeList(buffer, data, m);
-				}
-			}
-			buffer.append(OBJECT_CLOSE);
+			writeObject(buffer, data);
 		}		
 		return buffer.toString();
+	}
+	
+	/**
+	 * Writes a Java-Object into a JSON-String
+	 * 
+	 * @param buffer for the JSON-String
+	 * @param data   Object to be serialized to JSON
+	 * @throws SerializerException
+	 */
+	private static void writeObject(StringBuffer buffer, Object data) throws SerializerException {
+		Class<?> type = data.getClass();
+		Method methods[] = type.getMethods();
+		buffer.append(OBJECT_OPEN);
+		for(Method m : methods) {
+			if(isScalarGetter(m)) {				
+				writeScalar(buffer, data, m);
+			} else if(isListGetter(m)) {
+				writeList(buffer, data, m);
+			}
+		}
+		buffer.append(OBJECT_CLOSE);
 	}
 	
 	/**
