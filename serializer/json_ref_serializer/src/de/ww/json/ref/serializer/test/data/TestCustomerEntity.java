@@ -85,6 +85,20 @@ public class TestCustomerEntity {
 		return child;
 	}
 	
+	/*
+	 * Funktioniert nicht ...
+	 */
+	public ArrayList<ArrayList<String>> getBoxedArrayList() {
+		ArrayList<ArrayList<String>> lst = new ArrayList<ArrayList<String>>();
+		lst.add(new ArrayList<String>());
+		lst.get(0).add("Hallo");
+		lst.get(0).add("Welt");
+		lst.add(new ArrayList<String>());
+		lst.get(1).add("HalloX");
+		lst.get(1).add("WeltX");
+		return lst;
+	}
+	
 	public void setChild(TestCustomerEntity child) {
 		this.child = child;
 	}

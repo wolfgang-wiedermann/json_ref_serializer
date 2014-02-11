@@ -14,7 +14,7 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
  * 
  * siehe z. B. http://en.wikipedia.org/wiki/HATEOAS
  * 
- * TODO: JustReference bei Listen ...
+ * TODO: Serialisieren von verschachtelten Listen ...
  * 
  * @author wiw39784
  *
@@ -38,16 +38,20 @@ public class Serializer {
 	public static String serialize(Object data) throws SerializerException {
 		Class<?> type = data.getClass();
 		Method methods[] = type.getMethods();
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(OBJECT_OPEN);
-		for(Method m : methods) {
-			if(isScalarGetter(m)) {				
-				writeScalar(buffer, data, m);
-			} else if(isListGetter(m)) {
-				writeList(buffer, data, m);
+		StringBuffer buffer = new StringBuffer();		
+		if(isList(data)) {
+			writeList(buffer, (Iterable<?>)data, false);
+		} else {
+			buffer.append(OBJECT_OPEN);
+			for(Method m : methods) {
+				if(isScalarGetter(m)) {				
+					writeScalar(buffer, data, m);
+				} else if(isListGetter(m)) {
+					writeList(buffer, data, m);
+				}
 			}
-		}
-		buffer.append(OBJECT_CLOSE);
+			buffer.append(OBJECT_CLOSE);
+		}		
 		return buffer.toString();
 	}
 	
@@ -69,6 +73,18 @@ public class Serializer {
 		buffer.append(fieldName);
 		buffer.append(STRING_DELIMITER);
 		buffer.append(NAME_DELIMITER);
+		writeList(buffer, (Iterable<?>)list, m.isAnnotationPresent(JustReference.class));
+		buffer.append(FIELD_DELIMITER);
+		
+	}
+	
+	/**
+	 * Schreiben der eigentlichen Liste
+	 * @param buffer
+	 * @param list
+	 * @throws SerializerException
+	 */
+	private static void writeList(StringBuffer buffer, Iterable<?> list, boolean justReference) throws SerializerException {
 		buffer.append(ARRAY_OPEN);
 		if(list != null) {
 			Iterable<?> castedList = (Iterable<?>)list;
@@ -80,7 +96,7 @@ public class Serializer {
 				} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(o.getClass())) {
 					buffer.append(TypeSerializerRepository.getInstance().serialize(o));						
 				} else {
-					if(m.isAnnotationPresent(JustReference.class)) {
+					if(justReference) {
 						buffer.append(writeReference(o));
 					} else {
 						buffer.append(serialize(o));
@@ -90,8 +106,6 @@ public class Serializer {
 			}
 		} 
 		buffer.append(ARRAY_CLOSE);
-		buffer.append(FIELD_DELIMITER);
-		
 	}
 
 	/**
@@ -236,6 +250,18 @@ public class Serializer {
 	private static boolean isListGetter(Method m) {
 		return isGetter(m) 
 				&& (Iterable.class.isAssignableFrom(m.getReturnType()) || m.getReturnType().isArray());
+	}
+	
+	/**
+	 * Prüft, ob ein Objekt ein Listentyp ist (liefert im Falle o == null false)
+	 * @param o
+	 * @return
+	 */
+	private static boolean isList(Object o) {
+		if(o != null)
+			return o.getClass().isArray() || Iterable.class.isAssignableFrom(o.getClass());
+		else 
+			return false;
 	}
 	
 	/**

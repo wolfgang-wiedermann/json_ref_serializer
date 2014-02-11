@@ -42,6 +42,9 @@ public class TestSerializer {
 		lst.add(new TestCustomerEntity());
 		lst.add(new TestCustomerEntity());
 		
+		lst.get(0).setBirthDate(new Date());
+		lst.get(0).setId(1000);
+		
 		entity.setChildren(lst);
 		
 		
