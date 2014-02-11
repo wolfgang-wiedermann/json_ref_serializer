@@ -73,8 +73,11 @@ public class Serializer {
 		if(list != null) {
 			Iterable<?> castedList = (Iterable<?>)list;
 			for(Object o : castedList) {
-				if(o.getClass().isPrimitive() || o.getClass().equals(String.class)) {
-					buffer.append(STRING_DELIMITER+o+STRING_DELIMITER);
+				if(o.getClass().isPrimitive()) {
+					buffer.append(""+o);
+				} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(o.getClass())) {
+					if(o != null)
+						buffer.append(TypeSerializerRepository.getInstance().serialize(o));	
 				} else {
 					buffer.append(serialize(o));
 				}

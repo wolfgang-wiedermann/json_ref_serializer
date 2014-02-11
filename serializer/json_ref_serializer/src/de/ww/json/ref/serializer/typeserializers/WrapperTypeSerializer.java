@@ -9,8 +9,10 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
 public class WrapperTypeSerializer implements ITypeSerializer {
 
 	public String serialize(Object in) throws SerializerException {
-		// TODO: Prüfen, ob hier Anführungszeichen gut oder schlecht sind!
-		return Serializer.STRING_DELIMITER+in.toString()+Serializer.STRING_DELIMITER;
+		if(in instanceof String)
+			return Serializer.STRING_DELIMITER+in.toString()+Serializer.STRING_DELIMITER;
+		else
+			return in.toString();
 	}
 
 	public void registerAsPlugin(HashMap<Class<?>, ITypeSerializer> repository) {
