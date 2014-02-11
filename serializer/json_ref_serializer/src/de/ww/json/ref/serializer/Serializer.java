@@ -2,6 +2,7 @@ package de.ww.json.ref.serializer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -314,16 +315,28 @@ public class Serializer {
 	}
 	
 	/**
+	 * Erzeugt aus einem Array eine Liste
+	 * 
+	 * TODO: Prüfen, ob das auch mit einem Array aus primitiven funktioniert.
 	 * 
 	 * @param data
 	 * @return
 	 */
-	private static List arrayToListObject(Object data) throws SerializerException {
+	public static List<?> arrayToListObject(Object data) throws SerializerException {
 		if(data == null) return null;
 		if(!data.getClass().isArray()) throw new SerializerException("Es soll ein Array, das kein Array is in eine Liste umgewandelt werden");
 		
-		Object[] array = (Object[])data;
-		return Arrays.asList(array);
+		if(data.getClass().getComponentType().isPrimitive()) {
+			int length = java.lang.reflect.Array.getLength(data);
+			ArrayList<Object> lst = new ArrayList<Object>();
+			for(int i = 0; i < length; i++) {
+				lst.add(java.lang.reflect.Array.get(data, i));
+			}
+			return lst;
+		} else {
+			Object[] array = (Object[])data;
+			return Arrays.asList(array);
+		}
 	}
 
 }

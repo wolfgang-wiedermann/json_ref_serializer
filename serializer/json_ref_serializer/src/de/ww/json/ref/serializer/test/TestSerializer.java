@@ -4,14 +4,30 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Test;
 
 import de.ww.json.ref.serializer.Serializer;
+import de.ww.json.ref.serializer.exceptions.SerializerException;
 import de.ww.json.ref.serializer.test.data.TestCustomerEntity;
 
 public class TestSerializer {
 
+	@Test
+	public void testArrayToListObject_ObjectArray() throws SerializerException {
+		String[] lst = {"a", "b", "c", "d"};
+		List<?> list = Serializer.arrayToListObject(lst);
+		assertEquals(4, list.size());
+	}
+	
+	@Test
+	public void testArrayToListObject_PrimitveArray() throws SerializerException {
+		int[] lst = {1,2,3,4};
+		List<?> list = Serializer.arrayToListObject(lst);
+		assertEquals(4, list.size());
+	}
+	
 	@Test
 	public void testSerializeCustomerEntity() throws Exception {
 		TestCustomerEntity data = getTestData();
