@@ -73,13 +73,19 @@ public class Serializer {
 		if(list != null) {
 			Iterable<?> castedList = (Iterable<?>)list;
 			for(Object o : castedList) {
-				if(o.getClass().isPrimitive()) {
+				if(o == null) {
+					buffer.append("null");
+				} else if(o.getClass().isPrimitive()) {
 					buffer.append(""+o);
 				} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(o.getClass())) {
 					if(o != null)
-						buffer.append(TypeSerializerRepository.getInstance().serialize(o));	
+						buffer.append(TypeSerializerRepository.getInstance().serialize(o));						
 				} else {
-					buffer.append(serialize(o));
+					if(m.isAnnotationPresent(JustReference.class)) {
+						buffer.append(writeReference(o));
+					} else {
+						buffer.append(serialize(o));
+					}
 				}
 				buffer.append(FIELD_DELIMITER);
 			}
@@ -117,33 +123,23 @@ public class Serializer {
 	 * @throws SerializerException 
 	 */
 	private static Object getValue(Object data, Method m) throws SerializerException {
-		Object value = null;	
-		
-		if(m.getReturnType().isPrimitive() 
+		Object value = get(data, m);	
+		if(value == null) {
+			return null;
+		} else if(m.getReturnType().isPrimitive() 
 				|| m.getReturnType().equals(String.class)) {
-			// Primitive Typen und Strings
-			value = get(data, m);
+			// Primitive Typen und Strings			
 			value = STRING_DELIMITER+value+STRING_DELIMITER;
 		} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(m.getReturnType())) {
-			// Spezielle Basistypen wie java.lang.Date
-			value = get(data, m);
-			if(value != null)
-				value = TypeSerializerRepository.getInstance().serialize(value);			
+			// Spezielle Basistypen wie java.lang.Date			
+			value = TypeSerializerRepository.getInstance().serialize(value);			
 		} else {
 			// Alle anderen komplexen Typen
-			Object result = get(data, m);			 
+			Object result = get(data, m);	 
 			if(m.isAnnotationPresent(JustReference.class)) {
-				if(result != null) {
-					value = writeReference(result);
-				} else {
-					value = STRING_DELIMITER+"null"+STRING_DELIMITER;
-				}
+				value = writeReference(result);			
 			} else {				
-				if(result != null) {
-					value = serialize(result);
-				} else {
-					value = STRING_DELIMITER+"null"+STRING_DELIMITER;
-				}
+				value = serialize(result);				
 			}
 		}
 		return value;
@@ -151,6 +147,8 @@ public class Serializer {
 
 	/**
 	 * Schreibt ein Referenz-Objekt anstelle des eigentlichen JSON-Objekts
+	 * 
+	 * TODO: So funktionierts aber bei den Listen noch nicht ...
 	 * 
 	 * @param result
 	 * @return

@@ -67,9 +67,12 @@ public class TestCustomerEntity {
 		return lst;
 	}
 	
-	// Dieses JustReference funktioniert noch nicht!
 	@JustReference(lookupController=TestControllerDummy.class)
 	public ArrayList<TestCustomerEntity> getChildren() {
+		return children;
+	}
+	
+	public ArrayList<TestCustomerEntity> getChildren2() {
 		return children;
 	}
 	
