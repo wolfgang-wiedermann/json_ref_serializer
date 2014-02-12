@@ -156,14 +156,14 @@ public class SerializerImplementation implements ISerializer {
 		if(value == null) {
 			return null;
 		} else if(m.getReturnType().isPrimitive()) {
-			// Primitive Typen und Strings
+			// Primitive Typen
 			if(m.getReturnType().equals(char.class)) {
 				value = STRING_DELIMITER+value+STRING_DELIMITER;
 			} else {
 				value = ""+value;
 			}
 		} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(m.getReturnType())) {
-			// Spezielle Basistypen wie java.lang.Date			
+			// Spezielle Basistypen wie java.lang.Date, java.lang.Integer und Strings			
 			value = TypeSerializerRepository.getInstance().serialize(value);			
 		} else {
 			// Alle anderen komplexen Typen
