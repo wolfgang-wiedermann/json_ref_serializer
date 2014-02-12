@@ -8,7 +8,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import de.ww.json.ref.serializer.ISerializer;
 import de.ww.json.ref.serializer.Serializer;
+import de.ww.json.ref.serializer.SerializerFactory;
 import de.ww.json.ref.serializer.exceptions.SerializerException;
 import de.ww.json.ref.serializer.test.data.TestCustomerEntity;
 
@@ -16,22 +18,25 @@ public class TestSerializer {
 
 	@Test
 	public void testArrayToListObject_ObjectArray() throws SerializerException {
+		Serializer ser = SerializerFactory.getSerializerTestInstance();
 		String[] lst = {"a", "b", "c", "d"};
-		List<?> list = Serializer.arrayToListObject(lst);
+		List<?> list = ser.arrayToListObject(lst);
 		assertEquals(4, list.size());
 	}
 	
 	@Test
 	public void testArrayToListObject_PrimitveArray() throws SerializerException {
+		Serializer ser = SerializerFactory.getSerializerTestInstance();
 		int[] lst = {1,2,3,4};
-		List<?> list = Serializer.arrayToListObject(lst);
+		List<?> list = ser.arrayToListObject(lst);
 		assertEquals(4, list.size());
 	}
 	
 	@Test
 	public void testSerializeCustomerEntity() throws Exception {
+		ISerializer ser = SerializerFactory.getSerializerTestInstance();
 		TestCustomerEntity data = getTestData();
-		String str = Serializer.serialize(data);
+		String str = ser.serialize(data);
 		
 		System.out.println("Ergebnis: "+str);
 		assertEquals(true, str.length() > 0);

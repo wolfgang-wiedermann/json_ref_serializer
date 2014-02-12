@@ -21,7 +21,7 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
  * @author wiw39784
  *
  */
-public class Serializer {
+public class Serializer implements ISerializer {
 
 	public final static String OBJECT_OPEN = "{"
 			, OBJECT_CLOSE = "}"
@@ -37,7 +37,7 @@ public class Serializer {
 	 * @return
 	 * @throws SerializerException 
 	 */
-	public static String serialize(Object data) throws SerializerException {
+	public String serialize(Object data) throws SerializerException {
 		StringBuffer buffer = new StringBuffer();		
 		if(isList(data)) {
 			writeList(buffer, data, false);
@@ -54,7 +54,7 @@ public class Serializer {
 	 * @param data   Object to be serialized to JSON
 	 * @throws SerializerException
 	 */
-	private static void writeObject(StringBuffer buffer, Object data) throws SerializerException {
+	private void writeObject(StringBuffer buffer, Object data) throws SerializerException {
 		Class<?> type = data.getClass();
 		Method methods[] = type.getMethods();
 		buffer.append(OBJECT_OPEN);
@@ -78,7 +78,7 @@ public class Serializer {
 	 * @param m
 	 * @throws SerializerException 
 	 */
-	private static void writeList(StringBuffer buffer, Object data, Method m) throws SerializerException {
+	private void writeList(StringBuffer buffer, Object data, Method m) throws SerializerException {
 		String fieldName = getNormalizedGetterString(m);
 		Object list = get(data, m);
 		
@@ -97,7 +97,7 @@ public class Serializer {
 	 * @param list
 	 * @throws SerializerException
 	 */
-	private static void writeList(StringBuffer buffer, Object list, boolean justReference) throws SerializerException {
+	private void writeList(StringBuffer buffer, Object list, boolean justReference) throws SerializerException {
 		buffer.append(ARRAY_OPEN);
 		if(list != null) {
 			
@@ -133,7 +133,7 @@ public class Serializer {
 	 * @param m Get-Methode
 	 * @throws SerializerException 
 	 */
-	private static void writeScalar(StringBuffer buffer, Object data, Method m) throws SerializerException {
+	private void writeScalar(StringBuffer buffer, Object data, Method m) throws SerializerException {
 		String fieldName = getNormalizedGetterString(m);
 		
 		Object value = getValue(data, m);
@@ -153,7 +153,7 @@ public class Serializer {
 	 * @return
 	 * @throws SerializerException 
 	 */
-	private static Object getValue(Object data, Method m) throws SerializerException {
+	private Object getValue(Object data, Method m) throws SerializerException {
 		Object value = get(data, m);	
 		if(value == null) {
 			return null;
@@ -185,7 +185,7 @@ public class Serializer {
 	 * @return
 	 * @throws SerializerException 
 	 */
-	private static String writeReference(Object result) throws SerializerException {
+	private String writeReference(Object result) throws SerializerException {
 		
 		if(!result.getClass().isAnnotationPresent(RestPath.class))
 			throw new IllegalStateException("Referenzen sind nur für Entities mit RestPath-Annotation zulässig");
@@ -219,7 +219,7 @@ public class Serializer {
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 */
-	private static void writeReferenceUrlAttribute(StringBuffer buffer, Object result) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private void writeReferenceUrlAttribute(StringBuffer buffer, Object result) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		buffer.append("'url':'");
 		// TODO: in Zukunft noch alle möglichen enthaltenen {}-Parameter ersetzen!
 		String urlTemplate = result.getClass().getAnnotation(RestPath.class).value();
@@ -233,7 +233,7 @@ public class Serializer {
 	 * @param buffer
 	 * @param result
 	 */
-	private static void writeReferenceGetMethod(StringBuffer buffer, Object result) {
+	private void writeReferenceGetMethod(StringBuffer buffer, Object result) {
 		// TODO: hier noch eine richtige Lade-Funktion generieren...
 		buffer.append("'get':function(successHandler, errorHandler) { alert(this.url); }");
 	}
@@ -243,7 +243,7 @@ public class Serializer {
 	 * @param m
 	 * @return
 	 */
-	private static boolean isGetter(Method m) {
+	private boolean isGetter(Method m) {
 		return m.getName().startsWith("get") 
 				&& !(m.getReturnType().equals(Void.class) || m.getReturnType().equals(void.class))
 				&& !m.getName().equals("getClass")
@@ -255,7 +255,7 @@ public class Serializer {
 	 * @param m
 	 * @return
 	 */
-	private static boolean isScalarGetter(Method m) {
+	private boolean isScalarGetter(Method m) {
 		return isGetter(m) 
 				&& !(Iterable.class.isAssignableFrom(m.getReturnType()) || m.getReturnType().isArray());
 	}
@@ -265,7 +265,7 @@ public class Serializer {
 	 * @param m
 	 * @return
 	 */
-	private static boolean isListGetter(Method m) {
+	private boolean isListGetter(Method m) {
 		return isGetter(m) 
 				&& (Iterable.class.isAssignableFrom(m.getReturnType()) || m.getReturnType().isArray());
 	}
@@ -275,7 +275,7 @@ public class Serializer {
 	 * @param o
 	 * @return
 	 */
-	private static boolean isList(Object o) {
+	private boolean isList(Object o) {
 		if(o != null)
 			return o.getClass().isArray() || Iterable.class.isAssignableFrom(o.getClass());
 		else 
@@ -287,7 +287,7 @@ public class Serializer {
 	 * @param m
 	 * @return
 	 */
-	private static String getNormalizedGetterString(Method m) {
+	private String getNormalizedGetterString(Method m) {
 		if(!isGetter(m)) 
 			throw new IllegalStateException("Methode ist kein gültiger Getter");
 		
@@ -304,7 +304,7 @@ public class Serializer {
 	 * @return
 	 * @throws SerializerException
 	 */
-	private static Object get(Object data, Method m) throws SerializerException {
+	private Object get(Object data, Method m) throws SerializerException {
 		Object result;
 		try {
 			result = m.invoke(data);
@@ -322,7 +322,7 @@ public class Serializer {
 	 * @param data
 	 * @return
 	 */
-	public static List<?> arrayToListObject(Object data) throws SerializerException {
+	public List<?> arrayToListObject(Object data) throws SerializerException {
 		if(data == null) return null;
 		if(!data.getClass().isArray()) throw new SerializerException("Es soll ein Array, das kein Array is in eine Liste umgewandelt werden");
 		
