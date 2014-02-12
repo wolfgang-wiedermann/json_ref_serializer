@@ -21,7 +21,7 @@ import de.ww.json.ref.serializer.exceptions.SerializerException;
  * @author wiw39784
  *
  */
-public class Serializer implements ISerializer {
+public class SerializerImplementation implements ISerializer {
 
 	public final static String OBJECT_OPEN = "{"
 			, OBJECT_CLOSE = "}"
@@ -70,8 +70,6 @@ public class Serializer implements ISerializer {
 	
 	/**
 	 * Serialisiert Attribute mit Listen
-	 * 
-	 * TODO: ein geeignetes WriteList für Listen mit Referenzen schreiben.
 	 * 
 	 * @param buffer
 	 * @param data
@@ -153,14 +151,17 @@ public class Serializer implements ISerializer {
 	 * @return
 	 * @throws SerializerException 
 	 */
-	private Object getValue(Object data, Method m) throws SerializerException {
+	public Object getValue(Object data, Method m) throws SerializerException {
 		Object value = get(data, m);	
 		if(value == null) {
 			return null;
-		} else if(m.getReturnType().isPrimitive() 
-				|| m.getReturnType().equals(String.class)) {
-			// Primitive Typen und Strings			
-			value = STRING_DELIMITER+value+STRING_DELIMITER;
+		} else if(m.getReturnType().isPrimitive()) {
+			// Primitive Typen und Strings
+			if(m.getReturnType().equals(char.class)) {
+				value = STRING_DELIMITER+value+STRING_DELIMITER;
+			} else {
+				value = ""+value;
+			}
 		} else if(TypeSerializerRepository.getInstance().isSerializerAvailableFor(m.getReturnType())) {
 			// Spezielle Basistypen wie java.lang.Date			
 			value = TypeSerializerRepository.getInstance().serialize(value);			

@@ -2,18 +2,18 @@ package de.ww.json.ref.serializer;
 
 public class SerializerFactory {
 
-	private static Serializer serializerInstance = null;
+	private static SerializerImplementation serializerInstance = null;
 	
 	public static ISerializer getSerializerInstance() {
 		if(serializerInstance == null) {
-			serializerInstance = new Serializer();
+			serializerInstance = new SerializerImplementation();
 		}
 		return serializerInstance;
 	}
 
-	public static Serializer getSerializerTestInstance() {
+	public static SerializerImplementation getSerializerTestInstance() {
 		if(serializerInstance == null) {
-			serializerInstance = new Serializer();
+			serializerInstance = new SerializerImplementation();
 		}
 		return serializerInstance;
 	}
