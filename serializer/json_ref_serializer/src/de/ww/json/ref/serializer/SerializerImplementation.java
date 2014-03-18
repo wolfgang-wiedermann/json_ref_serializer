@@ -248,7 +248,7 @@ public class SerializerImplementation implements ISerializer {
 		return m.getName().startsWith("get") 
 				&& !(m.getReturnType().equals(Void.class) || m.getReturnType().equals(void.class))
 				&& !m.getName().equals("getClass")
-				&& m.getParameterCount() == 0;
+				&& m.getParameterTypes().length == 0;
 	}
 	
 	/**

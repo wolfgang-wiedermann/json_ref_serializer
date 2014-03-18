@@ -17,6 +17,9 @@ import de.ww.json.ref.serializer.annotations.RestPath;
  * Auch im anderen Fall (ohne knockout.java) muss der Pfad in die Just-Reference-Annotation 
  * rein und nicht über dem Entity stehen, das ist einfach zu unflexibel.
  *
+ * Dazu auch über HAL lesen (http://tools.ietf.org/html/draft-kelly-json-hal-06) und
+ * die Ideen aus http://docs.spring.io/spring-data/rest/docs/2.0.0.RELEASE/reference/htmlsingle/#install-chapter 
+ * berücksichtigen)
  */
 @RestPath("http://localhost:8080/test/entity/customer/{id}")
 public class TestCustomerEntity {
